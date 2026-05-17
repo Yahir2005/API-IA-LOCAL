@@ -10,8 +10,8 @@ class user(BaseModel):
     active: bool = True
 
 
-response = chat(
-    model ="dolphin3",
+response = chat( 
+    model ="dolphin-phi",
     messages= [
         {"role":"user","content":"¿Qué es la inteligencia artificial?"}
     ]
@@ -19,15 +19,3 @@ response = chat(
 
 print(response["message"]["content"])
 
-"""
-app = FastAPI()
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
-
-"""
-
-    
