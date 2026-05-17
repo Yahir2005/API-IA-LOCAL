@@ -1,0 +1,13 @@
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 422 Unprocessable Entity"
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 422 Unprocessable Entity"
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 422 Unprocessable Entity"
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 422 Unprocessable Entity"
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 422 Unprocessable Entity"
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 422 Unprocessable Entity"
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 422 Unprocessable Entity"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:ollama_app:Question: ¿Qué contiene esta imágen?
+INFO:ollama_app:Answer: Este imagen presenta la belleza natural de un paisaje montado de colores vibrantes, con elementos comunes en el desierto y un paseo donde se encuentran animales nativos como las bueyes, perros y olas.
+INFO:ollama_app:Thought: Esta imágen muestra el paisaje natural de un lugar lleno de vida. Las colores brillantes reflejan la belleza del entorno y los animales nativos que se encuentran durante su viaje.
+INFO:ollama_app:Topic: Natural beauty in the desert
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"

@@ -67,3 +67,7 @@ def llm_qa_response(payload: QuestionPayload):
     
     # Se retorna al usuario solo la pregunta y respuesta (QABase)
     return qa_instance
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("ollama_app:app", reload=True)
