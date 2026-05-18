@@ -4,8 +4,8 @@ import sys
 
 # Configuración de tu base de datos (¡Cámbiala con tus datos reales!)
 DB_CONFIG = {
-    "user": "root",
-    "password": "tu_password",
+    "user": "admin",
+    "password": "0110",
     "host": "localhost",
     "port": 3306,
     "database": "Futurework_ITT"
@@ -78,7 +78,8 @@ def buscar_talento_vectorial(requerimiento_empresa: str, limite: int = 5):
             u.nombreCompleto, 
             c.nombreCarrera, 
             p.ubicacion,
-            VECTOR_DISTANCE(p.perfil_vector, VEC_FromText(?)) AS afinidad
+            -- CORRECCIÓN AQUÍ: Usamos VEC_DISTANCE_COSINE
+            VEC_DISTANCE_COSINE(p.perfil_vector, VEC_FromText(?)) AS afinidad
         FROM Postulante p
         JOIN Usuarios u ON p.Usuarios_idUsuarios = u.idUsuarios
         JOIN Carrera c ON p.Carrera_idCarrera = c.idCarrera

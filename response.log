@@ -11,3 +11,256 @@ INFO:ollama_app:Answer: Este imagen presenta la belleza natural de un paisaje mo
 INFO:ollama_app:Thought: Esta imágen muestra el paisaje natural de un lugar lleno de vida. Las colores brillantes reflejan la belleza del entorno y los animales nativos que se encuentran durante su viaje.
 INFO:ollama_app:Topic: Natural beauty in the desert
 INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:ollama_app:Log: {'question': 'What does this image contain?', 'answer': 'This image contains a mountain landscape with a river flowing through it, surrounded by trees and mountains.', 'thought': 'The answer is that this image contains a mountain landscape with a river flowing through it, surrounded by trees and mountains.', 'topic': 'In the image of a mountain landscape with a river flowing through it, surrounded by trees and mountains,'}
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/embeddings "HTTP/1.1 200 OK"
+ERROR:asyncio:unhandled exception during asyncio.run() shutdown
+task: <Task finished name='anyio.from_thread.start_blocking_portal.<locals>.run_portal' coro=<start_blocking_portal.<locals>.run_portal() done, defined at /home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2334> exception=BaseExceptionGroup('unhandled errors in a TaskGroup', [SystemExit(1)])>
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2341, in wrapper
+  |     return await func(*args)
+  |            ^^^^^^^^^^^^^^^^^
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 522, in run_portal
+  |     async with BlockingPortal() as portal_:
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 210, in __aexit__
+  |     return await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  | BaseExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/vector_db.py", line 16, in get_connection
+    |     return mariadb.connect(**DB_CONFIG)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/mariadb/__init__.py", line 94, in connect
+    |     connection = connectionclass(*args, **kwargs)
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/mariadb/connections.py", line 85, in __init__
+    |     super().__init__(*args, **kwargs)
+    | mariadb.OperationalError: Access denied for user 'root'@'localhost'
+    | 
+    | During handling of the above exception, another exception occurred:
+    | 
+    | Traceback (most recent call last):
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 546, in start_blocking_portal
+    |     yield portal
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/testclient.py", line 419, in _portal_factory
+    |     yield portal
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/testclient.py", line 345, in handle_request
+    |     portal.call(self.app, scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 334, in call
+    |     return cast(T_Retval, self.start_task_soon(func, *args).result())
+    |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    |     return self.__get_result()
+    |            ^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    |     raise self._exception
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2358, in run
+    |     return runner.run(wrapper())
+    |            ^^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    |     return self._loop.run_until_complete(task)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/asyncio/base_events.py", line 674, in run_until_complete
+    |     self.run_forever()
+    |   File "/usr/lib/python3.12/asyncio/base_events.py", line 641, in run_forever
+    |     self._run_once()
+    |   File "/usr/lib/python3.12/asyncio/base_events.py", line 1987, in _run_once
+    |     handle._run()
+    |   File "/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    |     self._context.run(self._callback, *self._args)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 259, in _call_func
+    |     retval = await retval_or_awaitable
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/applications.py", line 90, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/routing.py", line 660, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/routing.py", line 680, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 134, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 120, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 674, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 330, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/ollama_app.py", line 77, in buscar_talento
+    |     candidatos = buscar_talento_vectorial(payload.requerimiento, payload.limite)
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/vector_db.py", line 71, in buscar_talento_vectorial
+    |     conn = get_connection()
+    |            ^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/vector_db.py", line 19, in get_connection
+    |     sys.exit(1)
+    | SystemExit: 1
+    +------------------------------------
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:ollama_app:Log: {'question': '¿Qué contiene esta imágen?', 'answer': 'Esta imágen cuenta de un perro juguetón, saliendo del parque y aunque sucede el tiempo, sigue disfrutando de la dulzura.', 'thought': 'La imagen nos muestra a un perro juguetón saliendo del parque. Esta foto hace que no importa lo que haya pasado y quien se ha conectado cuando se disfrutas de la dulzura.', 'topic': 'Imágenes'}
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/embeddings "HTTP/1.1 200 OK"
+ERROR:asyncio:unhandled exception during asyncio.run() shutdown
+task: <Task finished name='anyio.from_thread.start_blocking_portal.<locals>.run_portal' coro=<start_blocking_portal.<locals>.run_portal() done, defined at /home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:2334> exception=BaseExceptionGroup('unhandled errors in a TaskGroup', [SystemExit(1)])>
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2341, in wrapper
+  |     return await func(*args)
+  |            ^^^^^^^^^^^^^^^^^
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 522, in run_portal
+  |     async with BlockingPortal() as portal_:
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 210, in __aexit__
+  |     return await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  | BaseExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/vector_db.py", line 16, in get_connection
+    |     return mariadb.connect(**DB_CONFIG)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/mariadb/__init__.py", line 94, in connect
+    |     connection = connectionclass(*args, **kwargs)
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/mariadb/connections.py", line 85, in __init__
+    |     super().__init__(*args, **kwargs)
+    | mariadb.OperationalError: Access denied for user 'yahir2005'@'localhost'
+    | 
+    | During handling of the above exception, another exception occurred:
+    | 
+    | Traceback (most recent call last):
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 546, in start_blocking_portal
+    |     yield portal
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/testclient.py", line 419, in _portal_factory
+    |     yield portal
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/testclient.py", line 345, in handle_request
+    |     portal.call(self.app, scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 334, in call
+    |     return cast(T_Retval, self.start_task_soon(func, *args).result())
+    |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 456, in result
+    |     return self.__get_result()
+    |            ^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    |     raise self._exception
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2358, in run
+    |     return runner.run(wrapper())
+    |            ^^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    |     return self._loop.run_until_complete(task)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib/python3.12/asyncio/base_events.py", line 674, in run_until_complete
+    |     self.run_forever()
+    |   File "/usr/lib/python3.12/asyncio/base_events.py", line 641, in run_forever
+    |     self._run_once()
+    |   File "/usr/lib/python3.12/asyncio/base_events.py", line 1987, in _run_once
+    |     handle._run()
+    |   File "/usr/lib/python3.12/asyncio/events.py", line 88, in _run
+    |     self._context.run(self._callback, *self._args)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/from_thread.py", line 259, in _call_func
+    |     retval = await retval_or_awaitable
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/applications.py", line 1159, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/applications.py", line 90, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/routing.py", line 660, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/routing.py", line 680, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/routing.py", line 276, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 134, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 120, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 674, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/fastapi/routing.py", line 330, in run_endpoint_function
+    |     return await run_in_threadpool(dependant.call, **values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/starlette/concurrency.py", line 32, in run_in_threadpool
+    |     return await anyio.to_thread.run_sync(func)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/to_thread.py", line 63, in run_sync
+    |     return await get_async_backend().run_sync_in_worker_thread(
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2518, in run_sync_in_worker_thread
+    |     return await future
+    |            ^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/env/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1002, in run
+    |     result = context.run(func, *args)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/ollama_app.py", line 77, in buscar_talento
+    |     candidatos = buscar_talento_vectorial(payload.requerimiento, payload.limite)
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/vector_db.py", line 71, in buscar_talento_vectorial
+    |     conn = get_connection()
+    |            ^^^^^^^^^^^^^^^^
+    |   File "/home/yahir2005/Documents/repos/API-IA-LOCAL/vector_db.py", line 19, in get_connection
+    |     sys.exit(1)
+    | SystemExit: 1
+    +------------------------------------
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:ollama_app:Log: {'question': '¿Qué contiene esta imagen?', 'answer': 'Esta imagen muestra un perro con un corazón roto y dos bolsas de dolor en su pelvis. Los animales tienen cabeza, mente, rompirías, tratamiento y medicamentos para tratar ciertos problemas o sintomas.', 'thought': 'La imagen nos muestra alguna situación emocional que las animales en general enfrentan. Algunas pueden tener ciertos problemas o sintomas que deben tratar con el ayuda de una gente útil.', 'topic': 'Animales y su salud'}
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/embeddings "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:ollama_app:Log: {'question': '¿Qué contiene esta imagen?', 'answer': 'Esta imagen cuenta con dos personas en el parque, a menudo juntos. Esto nos recorda un día feliz y divertido que habíamos juntos.', 'thought': '', 'topic': 'Imagen'}
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/embeddings "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:ollama_app:Log: {'question': '¿Qué contiene esta imágen?', 'answer': 'Esta imágen cuenta de un perro jugando en el parque.', 'thought': 'Determinar la parte donde se encuentra el texto dentro del archivo', 'topic': 'Gestión y organización informatica'}
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/embeddings "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/empresas/buscar-talento "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/embeddings "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+INFO:ollama_app:Log: {'question': 'What is in this image?', 'answer': "The image contains a close-up view of a person's face, highlighting their unique facial features and expressions.", 'thought': 'The image showcases the intricate design of the human face, which is a fascinating subject for exploration. Facial expressions are an important aspect of communication and can convey various emotions and messages. Additionally, the image displays the complexity of the human eye, which allows us to perceive light and color in the world around us.', 'topic': 'Facial Features'}
+INFO:httpx:HTTP Request: POST http://testserver/question "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://127.0.0.1:11434/api/embeddings "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/empresas/buscar-talento "HTTP/1.1 200 OK"
