@@ -2,8 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import base64
-from ollama import chat
+import ollama 
 import logging
+import chromadb
 from vector_db import generar_vector_postulante, buscar_talento_vectorial
 
 # --- Logging ---
@@ -26,8 +27,8 @@ class QuestionPayload(BaseModel):
     question: str
     encoded_image: str
 
-class MensajeChat(BaseModel):
-    mensaje: str
+class ChatRequest(BaseModel):
+    message: str
 
 # --- Funciones Auxiliares ---
 def encode_image_to_base64(image_path: str) -> str:
@@ -46,83 +47,91 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
+# SEGURO: get_or_create_collection evita que la API truene si la DB vectorial está vacía al inicio
+chroma_client = chromadb.PersistentClient(path="./candidatos_vdb")
+coleccion = chroma_client.get_or_create_collection(name="postulantes")
+
+
 # Endpoint 1: Pregunta sobre una imagen
 @app.post("/question")
 def llm_qa_response(payload: QuestionPayload):
-    response = chat(
-        model='dolphin-phi', 
-        messages=[
-            {'role': 'system', 'content': 'Eres un ayudante útil.'},
-            {'role': 'user', 'content': payload.question, 'images': [payload.encoded_image]}
-        ],
-        format=QAAnalytics.model_json_schema()
-    )
-    qa_instance = QAAnalytics.model_validate_json(response.message.content)
-    log_response(logger, qa_instance.model_dump())
-    return qa_instance
+    try:
+        response = ollama.chat(
+            model='dolphin3', 
+            messages=[
+                {'role': 'system', 'content': 'Eres un ayudante útil.'},
+                {'role': 'user', 'content': payload.question, 'images': [payload.encoded_image]}
+            ],
+            format=QAAnalytics.model_json_schema()
+        )
+        qa_instance = QAAnalytics.model_validate_json(response.message.content)
+        log_response(logger, qa_instance.model_dump())
+        return qa_instance
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # Endpoint 2: Vectorizar a un Postulante
 @app.post("/postulantes/{id_postulante}/vectorizar")
 def vectorizar_postulante(id_postulante: int):
     exito = generar_vector_postulante(id_postulante)
     if not exito:
-        raise HTTPException(status_code=404, detail="Postulante no encontrado.")
+        raise HTTPException(status_code=404, detail="Postulante no encontrado o error en la base de datos.")
     return {"mensaje": "Perfil vectorizado correctamente."}
+
 
 # Endpoint 3: El motor del Chatbot RAG
 @app.post("/chat/reclutador")
-def chatbot_reclutador(payload: MensajeChat):
-    mensaje_limpio = payload.mensaje.lower().strip()
-
-    saludos_comunes = ["hola", "buenas", "buenos dias", "buenas tardes", "buenas noches", "qué tal", "que tal", "saludos", "hi", "hey","hola buenas tardes","hola buenas noches","hola buenos dias"]
+async def chat_reclutador(request: ChatRequest):
+    user_message = request.message # Asegúrate de que aquí diga .message o .mensaje según tu Pydantic
     
-    # Si el usuario solo saluda, respondemos instantáneamente sin usar la BD ni la IA
-    if mensaje_limpio in saludos_comunes:
-        return {
-            "respuesta": "¡Hola! 👋 Soy el asistente de reclutamiento de Futurework ITT. ¿Qué habilidades o perfil técnico estás buscando hoy en un candidato?",
-            "candidatos_crudos": []
-        }
+    try:
+        # CONTROL DE SEGURIDAD: Verificar cuántos candidatos hay indexados
+        total_candidatos = coleccion.count()
         
-    # Si el mensaje es muy corto (ej. "a", "ok", "?"), pedimos más contexto
-    if len(mensaje_limpio) < 3:
-         return {
-            "respuesta": "Por favor, dame un poco más de detalle sobre el talento que buscas para poder ayudarte.",
-            "candidatos_crudos": []
-        }
-    
-    # 1. Buscar en la base de datos
-    candidatos = buscar_talento_vectorial(payload.mensaje, limite=3)
-    
-    if not candidatos:
-        return {"respuesta": "Lo siento, actualmente no tenemos candidatos que coincidan con esa descripción en nuestra plataforma.", "candidatos": []}
-
-    # 2. Armar el contexto para la IA
-    contexto = "Candidatos encontrados:\n"
-    for c in candidatos:
-        contexto += f"- {c['nombreCompleto']} ({c['nombreCarrera']} en {c['ubicacion']}). Match: {c['porcentaje_match']}%\n"
-
-    # 3. Prompt del sistema
-    prompt_sistema = f"""
-    Eres el asistente inteligente de reclutamiento de Futurework_ITT. 
-    Un reclutador pide: "{payload.mensaje}"
-    
-    Redacta una respuesta amable presentando a los candidatos. Basa tu respuesta SÓLO en esta información:
-    {contexto}
-    """
-
-    # 4. Obtener respuesta de la IA
-    response = chat(
-        model='dolphin-phi',
-        messages=[
-            {'role': 'system', 'content': prompt_sistema},
-            {'role': 'user', 'content': 'Por favor, preséntame a los candidatos encontrados.'}
-        ]
-    )
-    
-    return {
-        "respuesta": response.message.content,
-        "candidatos_crudos": candidatos
-    }
+        if total_candidatos == 0:
+            # Si no hay nadie vectorizado, le pasamos un texto vacío al prompt del sistema
+            candidatos_encontrados = "No hay ningún candidato registrado o vectorizado en la plataforma todavía."
+        else:
+            # 1. Convertir la consulta del reclutador en un vector
+            response_emb = ollama.embeddings(model="nomic-embed-text", prompt=user_message)
+            query_embedding = response_emb['embedding']
+            
+            # Si hay menos de 3 candidatos en total, le pedimos a Chroma sólo los que existan
+            limite_resultados = min(3, total_candidatos)
+            
+            # 2. Buscar en ChromaDB de forma segura
+            resultados = coleccion.query(
+                query_embeddings=[query_embedding],
+                n_results=limite_resultados
+            )
+            candidatos_encontrados = "\n".join(resultados['documents'][0]) if resultados['documents'] else "No se encontraron candidatos."
+        
+        # 3. Construir el Prompt del sistema inyectando el contexto obtenido
+        system_prompt = f"""
+        Eres el asistente inteligente de reclutamiento para la plataforma Futurework ITT.
+        Tu objetivo es ayudar a los reclutadores a encontrar candidatos ideales basándote en la información proporcionada a continuación.
+        
+        CANDIDATOS DISPONIBLES EN LA PLATAFORMA:
+        {candidatos_encontrados}
+        
+        Instrucciones:
+        - Si hay candidatos que coincidan con la búsqueda, menciónalos de manera profesional, incluyendo sus nombres, habilidades y correos.
+        - Si la lista de candidatos está vacía o dices que no hay nadie registrado, dile amablemente al reclutador que por el momento no hay perfiles dados de alta en el sistema.
+        """
+        
+        # 4. Enviar todo a Ollama (Asegúrate de usar 'dolphin3' si es el que tienes descargado)
+        response = ollama.chat(model="dolphin3", messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ])
+        
+        return {"response": response.message.content}
+        
+    except Exception as e:
+        # ESTO ES CLAVE: Imprime el error real en tu terminal de Linux para saber qué pasó
+        print(f"\n[ERROR CRÍTICO EN /chat/reclutador]: {str(e)}\n")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

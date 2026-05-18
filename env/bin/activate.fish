@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/yahir2005/Documents/repos/API-IA-LOCAL/env
+set -gx VIRTUAL_ENV /home/yahir/Documents/repos/API-IA-LOCAL/env
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH

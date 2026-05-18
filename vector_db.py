@@ -1,94 +1,95 @@
-import mariadb
+import pymysql
 import ollama
-import sys
+import chromadb
 
-# Configuración de tu base de datos (¡Cámbiala con tus datos reales!)
-DB_CONFIG = {
-    "user": "admin",
-    "password": "0110",
-    "host": "localhost",
-    "port": 3306,
-    "database": "Futurework_ITT"
-}
+# Configuración de conexión a MariaDB
+def obtener_conexion_db():
+    return pymysql.connect(
+        host="localhost",
+        user="admin",            # <-- Ajusta tu usuario de MariaDB
+        password="0110",    # <-- Ajusta tu contraseña
+        database="Futurework_ITT",
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
-def get_connection():
+def generar_vector_postulante(id_postulante: int) -> bool:
+    """
+    Consulta los datos de un postulante en MariaDB, genera su string de texto,
+    crea el embedding con Ollama y lo guarda/actualiza en ChromaDB.
+    """
     try:
-        return mariadb.connect(**DB_CONFIG)
-    except mariadb.Error as e:
-        print(f"Error conectando a MariaDB: {e}")
-        sys.exit(1)
-
-def generar_vector_postulante(id_postulante: int):
-    """Genera el perfil semántico del postulante y lo guarda como vector."""
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    
-    # 1. Obtener la información del postulante uniendo las tablas
-    query_info = """
-        SELECT c.nombreCarrera, p.ubicacion,
-               GROUP_CONCAT(DISTINCT h.nombreHabilidad SEPARATOR ', ') AS habilidades,
-               GROUP_CONCAT(DISTINCT cert.nombre SEPARATOR ', ') AS certificaciones
-        FROM Postulante p
-        JOIN Carrera c ON p.Carrera_idCarrera = c.idCarrera
-        LEFT JOIN Postulante_Habilidades ph ON p.idPostulante = ph.Postulante_idPostulante
-        LEFT JOIN Habilidades h ON ph.Habilidades_idHabilidad = h.idHabilidad
-        LEFT JOIN Postulante_Certificacion pc ON p.idPostulante = pc.Postulante_idPostulante
-        LEFT JOIN Certificaciones cert ON pc.Certificaciones_idCertificacion = cert.idCertificacion
-        WHERE p.idPostulante = ?
-        GROUP BY p.idPostulante;
-    """
-    cursor.execute(query_info, (id_postulante,))
-    datos = cursor.fetchone()
-    
-    if not datos:
-        conn.close()
-        return False
+        db = obtener_conexion_db()
+        with db.cursor() as cursor:
+            # 1. Obtener datos base del Postulante
+            cursor.execute("SELECT Usuarios_idUsuarios, ubicacion FROM Postulante WHERE idPostulante = %s", (id_postulante,))
+            postulante = cursor.fetchone()
+            if not postulante:
+                print(f"Postulante con ID {id_postulante} no encontrado en la DB.")
+                db.close()
+                return False
+            
+            # 2. Obtener datos del Usuario
+            cursor.execute("SELECT nombreCompleto, email FROM Usuarios WHERE idUsuarios = %s", (postulante['Usuarios_idUsuarios'],))
+            usuario = cursor.fetchone()
+            
+            # 3. Obtener sus Habilidades
+            cursor.execute("""
+                SELECT h.nombreHabilidad FROM Postulante_Habilidades ph
+                INNER JOIN Habilidades h ON ph.Habilidades_idHabilidad = h.idHabilidad
+                WHERE ph.Postulante_idPostulante = %s
+            """, (id_postulante,))
+            habilidades = [row['nombreHabilidad'] for row in cursor.fetchall()]
+            
+            # 4. Obtener sus Certificaciones
+            cursor.execute("""
+                SELECT c.nombre FROM Postulante_Certificacion pc
+                INNER JOIN Certificaciones c ON pc.Certificaciones_idCertificacion = c.idCertificacion
+                WHERE pc.Postulante_idPostulante = %s
+            """, (id_postulante,))
+            certificaciones = [row['nombre'] for row in cursor.fetchall()]
         
-    # 2. Armar el texto descriptivo
-    habilidades = datos['habilidades'] if datos['habilidades'] else "Ninguna"
-    certificaciones = datos['certificaciones'] if datos['certificaciones'] else "Ninguna"
-    
-    texto_perfil = f"Profesional en {datos['nombreCarrera']}. Ubicado en {datos['ubicacion']}. " \
-                   f"Habilidades: {habilidades}. Certificaciones: {certificaciones}."
-                   
-    # 3. Generar el vector con el modelo nomic-embed-text
-    respuesta = ollama.embeddings(model="nomic-embed-text", prompt=texto_perfil)
-    vector_str = str(respuesta["embedding"])
-    
-    # 4. Guardar el vector
-    query_update = "UPDATE Postulante SET perfil_vector = VEC_FromText(?) WHERE idPostulante = ?"
-    cursor.execute(query_update, (vector_str, id_postulante))
-    conn.commit()
-    conn.close()
-    return True
+        db.close()
 
-def buscar_talento_vectorial(requerimiento_empresa: str, limite: int = 5):
-    """Busca los postulantes que mejor hagan match con lo que pide la empresa."""
-    # Convertimos la búsqueda de la empresa en vector
-    respuesta = ollama.embeddings(model="nomic-embed-text", prompt=requerimiento_empresa)
-    vector_busqueda = str(respuesta["embedding"])
-    
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    
-    # Buscamos usando VECTOR_DISTANCE
-    query_busqueda = """
-        SELECT 
-            p.idPostulante, 
-            u.nombreCompleto, 
-            c.nombreCarrera, 
-            p.ubicacion,
-            -- ESTA LÍNEA ES LA CLAVE:
-            ROUND((1 - VEC_DISTANCE_COSINE(p.perfil_vector, VEC_FromText(?))) * 100, 2) AS porcentaje_match
-        FROM Postulante p
-        JOIN Usuarios u ON p.Usuarios_idUsuarios = u.idUsuarios
-        JOIN Carrera c ON p.Carrera_idCarrera = c.idCarrera
-        WHERE p.perfil_vector IS NOT NULL
-        ORDER BY porcentaje_match DESC
-        LIMIT ?
+        # 5. Crear el texto plano estructurado
+        texto_perfil = f"Postulante: {usuario['nombreCompleto']}. Email: {usuario['email']}. Ubicación: {postulante['ubicacion']}. "
+        texto_perfil += f"Habilidades: {', '.join(habilidades)}. "
+        texto_perfil += f"Certificaciones: {', '.join(certificaciones)}."
+
+        # 6. Inicializar ChromaDB y guardar el vector
+        chroma_client = chromadb.PersistentClient(path="./candidatos_vdb")
+        coleccion = chroma_client.get_or_create_collection(name="postulantes")
+        
+        # Generar embedding con Ollama
+        response_emb = ollama.embeddings(model="nomic-embed-text", prompt=texto_perfil)
+        embedding = response_emb['embedding']
+        
+        # Guardar o actualizar (Upsert)
+        coleccion.upsert(
+            ids=[str(id_postulante)],
+            embeddings=[embedding],
+            documents=[texto_perfil],
+            metadatas=[{"id_usuario": postulante['Usuarios_idUsuarios'], "nombre": usuario['nombreCompleto']}]
+        )
+        return True
+
+    except Exception as e:
+        print(f"Error al generar vector para el postulante {id_postulante}: {e}")
+        return False
+
+def buscar_talento_vectorial(query: str):
     """
-    cursor.execute(query_busqueda, (vector_busqueda, limite))
-    candidatos = cursor.fetchall()
-    conn.close()
-    
-    return candidatos
+    Función auxiliar por si necesitas hacer búsquedas rápidas 
+    directamente desde este módulo.
+    """
+    try:
+        chroma_client = chromadb.PersistentClient(path="./candidatos_vdb")
+        coleccion = chroma_client.get_or_create_collection(name="postulantes")
+        
+        response_emb = ollama.embeddings(model="nomic-embed-text", prompt=query)
+        query_embedding = response_emb['embedding']
+        
+        resultados = coleccion.query(query_embeddings=[query_embedding], n_results=3)
+        return resultados
+    except Exception as e:
+        print(f"Error en la búsqueda vectorial: {e}")
+        return None
