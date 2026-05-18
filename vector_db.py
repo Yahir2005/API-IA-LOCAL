@@ -78,13 +78,13 @@ def buscar_talento_vectorial(requerimiento_empresa: str, limite: int = 5):
             u.nombreCompleto, 
             c.nombreCarrera, 
             p.ubicacion,
-            -- CORRECCIÓN AQUÍ: Usamos VEC_DISTANCE_COSINE
-            VEC_DISTANCE_COSINE(p.perfil_vector, VEC_FromText(?)) AS afinidad
+            -- ESTA LÍNEA ES LA CLAVE:
+            ROUND((1 - VEC_DISTANCE_COSINE(p.perfil_vector, VEC_FromText(?))) * 100, 2) AS porcentaje_match
         FROM Postulante p
         JOIN Usuarios u ON p.Usuarios_idUsuarios = u.idUsuarios
         JOIN Carrera c ON p.Carrera_idCarrera = c.idCarrera
         WHERE p.perfil_vector IS NOT NULL
-        ORDER BY afinidad ASC
+        ORDER BY porcentaje_match DESC
         LIMIT ?
     """
     cursor.execute(query_busqueda, (vector_busqueda, limite))
